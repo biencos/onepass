@@ -1,6 +1,15 @@
 version: "3.7"
 
 services:
+  web:
+    build: ./web
+    container_name: web
+    restart: always
+    env_file: ./web/.env
+    expose:
+      - 8080
+    volumes:
+      - ./web:/docker-entrypoint-initdb.d/:ro
 
   nginx:
     build: ./nginx
