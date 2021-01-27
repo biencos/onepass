@@ -408,9 +408,10 @@ def load_dashboard():
 
 # LOGOUT
 @ app.route('/logout')
+@ limiter.exempt
 def load_logout():
-    # TODO
-    return
+    session.clear()
+    return redirect('load_home')
 
 
 # PASSWORDS
