@@ -396,9 +396,14 @@ def reset_password(reset_id):
 
 # DASHBOARD
 @ app.route('/dashboard')
+@ limiter.exempt
 def load_dashboard():
-    # TODO
-    return
+    username = session.get("username")
+    if username:
+        return render_template('dashboard.html')
+    else:
+        flash("Ta akcja wymaga zalogowania!")
+        return redirect('load_login')
 
 
 # LOGOUT
