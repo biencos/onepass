@@ -1,0 +1,59 @@
+[33mcommit cf1048b50644656d9e76fbd87f7afe26e908438f[m[33m ([m[1;36mHEAD -> [m[1;32mfeatures/web-features[m[33m)[m
+Author: biencos <sewerynbienko@gmail.com>
+Date:   Wed Jan 27 18:59:30 2021 +0100
+
+    Add load_passwords()
+
+[33mcommit e9fa39ac68157487df33f37169663b155316c843[m
+Author: biencos <sewerynbienko@gmail.com>
+Date:   Wed Jan 27 18:12:23 2021 +0100
+
+    Add load_logout()
+
+[33mcommit 89f61b0af487440d6618a3b6a51c2a13ded5872a[m
+Author: biencos <sewerynbienko@gmail.com>
+Date:   Wed Jan 27 17:55:42 2021 +0100
+
+    Add load_dashboard()
+
+[33mcommit ae95da7c7989537d92791bb931b0a92bdb406209[m
+Author: biencos <sewerynbienko@gmail.com>
+Date:   Wed Jan 27 17:30:17 2021 +0100
+
+    Add load_reset_with_token() and reset_password()
+
+[33mcommit 5eebbd73edf565af34bb4f97863c51ed52b08240[m
+Author: biencos <sewerynbienko@gmail.com>
+Date:   Wed Jan 27 16:26:58 2021 +0100
+
+    Add load_reset() and handle_reset_request()
+
+[33mcommit 46d08bea753bd84428ea50400735966957015dba[m
+Author: biencos <sewerynbienko@gmail.com>
+Date:   Wed Jan 27 15:48:36 2021 +0100
+
+    Add load_login() and login()
+
+[33mcommit 8a06afa77d6f91e37880442173002a630885870e[m
+Author: biencos <sewerynbienko@gmail.com>
+Date:   Wed Jan 27 14:05:08 2021 +0100
+
+    Add load_register() and register()
+
+[33mcommit 8faa6301916e6fdaf88f6c453857f6b49d3a413c[m[33m ([m[1;31morigin/develop[m[33m, [m[1;32mdevelop[m[33m)[m
+Author: biencos <sewerynbienko@gmail.com>
+Date:   Wed Jan 27 00:58:30 2021 +0100
+
+    Add web container
+
+[33mcommit 4a8028b799de06c522ce77d8a770bed3b7270481[m
+Author: biencos <sewerynbienko@gmail.com>
+Date:   Tue Jan 26 01:10:59 2021 +0100
+
+    Add configured nginx container.
+
+[33mcommit 488f81b35f3ee01aa407a2424eefd6fdf8bccf5e[m[33m ([m[1;33mtag: v0.1[m[33m, [m[1;31morigin/main[m[33m, [m[1;32mmain[m[33m)[m
+Author: biencos <sewerynbienko@gmail.com>
+Date:   Tue Jan 26 01:05:06 2021 +0100
+
+    Add empty readme

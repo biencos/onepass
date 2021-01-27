@@ -14,6 +14,7 @@ from flask_limiter.util import get_remote_address
 from uuid import uuid4
 
 from app import app
+from .models.aes import AESCipher
 
 
 load_dotenv()
@@ -24,6 +25,8 @@ EMAIL_MIN_LENGTH = int(os.getenv("EMAIL_MIN_LENGTH"))
 EMAIL_MAX_LENGTH = int(os.getenv("EMAIL_MAX_LENGTH"))
 PASSWORD_MIN_LENGTH = int(os.getenv("PASSWORD_MIN_LENGTH"))
 PASSWORD_MAX_LENGTH = int(os.getenv("PASSWORD_MAX_LENGTH"))
+SERVICE_NAME_MIN_LENGTH = int(os.getenv("SERVICE_NAME_MIN_LENGTH"))
+SERVICE_NAME_MAX_LENGTH = int(os.getenv("SERVICE_NAME_MAX_LENGTH"))
 
 limiter = Limiter(
     app,
@@ -440,8 +443,49 @@ def load_passwords():
 
 @ app.route('/passes', methods=["POST"])
 def add_pass():
-    # TODO
-    return
+    username = session.get("username")
+    if not username:
+        flash("Ta akcja wymaga zalogowania!")
+        return redirect('load_login', 401)
+
+    ERROR_MESSAGE = "Podczas dodawania wystąpił błąd, czy jesteś pewien że poprawnie wypełniłeś wszystkie pola?"
+    empty_fields = [f for f in request.form.values() if not f]
+    if len(empty_fields) != 0:
+        return ERROR_MESSAGE, 400
+
+    name = request.form.get("new-name")
+    password = request.form.get("new-password")
+    master_password = request.form.get("master-pass")
+
+    if len(name) < SERVICE_NAME_MIN_LENGTH or len(name) > SERVICE_NAME_MAX_LENGTH or len(password) < PASSWORD_MIN_LENGTH or len(password) > PASSWORD_MAX_LENGTH or len(master_password) < PASSWORD_MIN_LENGTH or len(master_password) > PASSWORD_MAX_LENGTH:
+        return ERROR_MESSAGE, 400
+
+    if verify_master(username, master_password):
+        password = encrypt_password(password, master_password)
+        q = 'INSERT INTO passwords (username, name, password) VALUES (?, ?, ?)'
+        v = [username, name, password]
+        if query_db(q, v):
+            return "Dodano nowe hasło", 201
+        else:
+            return ERROR_MESSAGE, 400
+    else:
+        return ERROR_MESSAGE, 401
+
+
+def verify_master(username, master_password):
+    master_password = master_password.encode()
+    res = select_from_db(
+        'SELECT master_password FROM users WHERE username = ?', [username])
+    if res != None:
+        hashed = res[0]
+        if hashed:
+            return checkpw(master_password, hashed)
+    return False
+
+
+def encrypt_password(password, master_password):
+    c = AESCipher(key=master_password)
+    return c.encrypt(password)
 
 
 @ app.route('/passes/master', methods=["POST"])
