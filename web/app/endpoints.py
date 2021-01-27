@@ -6,7 +6,7 @@ from time import sleep
 from datetime import datetime, timedelta
 from random import randint
 
-from flask import render_template, g, request, make_response, flash, url_for, session
+from flask import render_template, g, request, make_response, flash, url_for, session, jsonify
 from dotenv import load_dotenv
 from bcrypt import hashpw, gensalt, checkpw
 from flask_limiter import Limiter
@@ -417,8 +417,25 @@ def load_logout():
 # PASSWORDS
 @ app.route('/passes', methods=["GET"])
 def load_passwords():
-    # TODO
-    return
+    username = session.get("username")
+    if not username:
+        flash("Ta akcja wymaga zalogowania!")
+        return redirect('load_login', 401)
+
+    res = select_from_db(
+        'SELECT name FROM passwords WHERE username = ?', [username], "all")
+
+    response = {}
+    if res != None:
+        passes = []
+        for r in res:
+            p = {}
+            p['name'] = r[0]
+            passes.append(p)
+        response['passes'] = passes
+    else:
+        return "Podczas pobierania wystąpił błąd!", 400
+    return jsonify(response), 200
 
 
 @ app.route('/passes', methods=["POST"])
