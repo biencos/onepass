@@ -2,10 +2,15 @@ import os
 import logging
 import re
 import sqlite3 as sql
+from time import sleep
+from datetime import datetime, timedelta
+from random import randint
 
-from flask import render_template,  g, request, make_response, flash, url_for
+from flask import render_template, g, request, make_response, flash, url_for, session
 from dotenv import load_dotenv
 from bcrypt import hashpw, gensalt, checkpw
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
 
 from app import app
 
@@ -19,6 +24,11 @@ EMAIL_MAX_LENGTH = int(os.getenv("EMAIL_MAX_LENGTH"))
 PASSWORD_MIN_LENGTH = int(os.getenv("PASSWORD_MIN_LENGTH"))
 PASSWORD_MAX_LENGTH = int(os.getenv("PASSWORD_MAX_LENGTH"))
 
+limiter = Limiter(
+    app,
+    key_func=get_remote_address,
+    default_limits=[os.getenv("LIMIT_PER_DAY"), os.getenv("LIMIT_PER_MINUTE")]
+)
 app.secret_key = os.getenv("SECRET_KEY")
 logging.basicConfig(level=logging.INFO)
 
@@ -194,14 +204,56 @@ def redirect(destination_name, status=302):
 # LOGIN
 @ app.route('/login')
 def load_login():
-    # TODO
-    return
+    return render_template("login.html")
 
 
 @ app.route('/login', methods=['POST'])
 def login():
-    # TODO
-    return
+    empty_fields = [f for f in request.form.values() if not f]
+    if len(empty_fields) != 0:
+        flash("Nazwa użytkownika ani hasło nie może być puste!")
+        wait_some_time()
+        return redirect('load_login')
+
+    username = request.form.get('username')
+    password = request.form.get('password')
+    if len(username) < USERNAME_MIN_LENGTH or len(username) > USERNAME_MAX_LENGTH:
+        flash("Podano niepoprawną nazwę użytkownika!")
+        wait_some_time()
+        return redirect('load_login')
+    if len(password) < PASSWORD_MIN_LENGTH or len(password) > PASSWORD_MAX_LENGTH:
+        flash("Podano niepoprawne hasło!")
+        wait_some_time()
+        return redirect('load_login')
+
+    if is_registred(username):
+        password = password.encode()
+        res = select_from_db(
+            'SELECT password FROM users WHERE username = ?', [username])
+        hashed = res[0]
+        if hashed:
+            if checkpw(password, hashed):
+                # Użytkownik się zalogował
+                flash(f"Witaj z powrotem {username}")
+                session["username"] = username
+                session["logged-at"] = datetime.now().strftime("%Y-%m-%dT%H:%M:%S.%f")
+                return redirect('load_dashboard')
+            else:
+                # Użytkownik się pomylił, albo przeprowadzono atak na niego
+                query_db('INSERT INTO attempts (username, ip_address, time) VALUES (?, ?, ?);', [
+                    username, get_remote_address(), datetime.now()])
+                wait_some_time()
+                return redirect('load_login')
+    else:
+        # Użytkownika nie ma w db
+        flash("Nieprawidłowe dane logowania!")
+        wait_some_time()
+        return redirect('load_login')
+
+
+def wait_some_time(l1=200, l2=900):
+    d = randint(l1, l2)/1000
+    sleep(d)
 
 
 # RESET

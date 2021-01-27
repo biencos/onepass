@@ -5,3 +5,5 @@ MarkupSafe==1.1.1
 Click==7.0
 Werkzeug==0.15.1
 python-dotenv
+bcrypt
+Flask-Limiter
