@@ -1,0 +1,33 @@
+{% extends "base.html" %} {% block content %}
+
+<head>
+</head>
+
+<body>
+    <div class="login-page">
+        <div class="form-with-header">
+            <section>
+                <h2>Logowanie</h2>
+                <div class="form">
+                    <form name="form" method="POST" action="/login" enctype="multipart/form-data">
+                        <ul>
+                            <div class="form-element">
+                                <input id="username" name="username" type="text" placeholder="Nazwa Użytkownika" required>
+                            </div>
+
+                            <div class="form-element">
+                                <input id="password" name="password" type="password" placeholder="Hasło" required>
+                            </div>
+
+                            <div class="form-element-submit">
+                                <input type="submit" name="submit" value="Zaloguj się">
+                            </div>
+                        </ul>
+                    </form>
+                </div>
+            </section>
+        </div>
+    </div>
+</body>
+
+{% endblock %}
