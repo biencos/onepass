@@ -11,6 +11,7 @@ from dotenv import load_dotenv
 from bcrypt import hashpw, gensalt, checkpw
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
+from uuid import uuid4
 
 from app import app
 
@@ -258,15 +259,64 @@ def wait_some_time(l1=200, l2=900):
 
 # RESET
 @ app.route('/reset')
+@ limiter.exempt
 def load_reset():
-    # TODO
-    return
+    return render_template("reset.html")
 
 
 @ app.route('/reset', methods=['POST'])
 def handle_reset_request():
+    empty_fields = [f for f in request.form.values() if not f]
+    if len(empty_fields) != 0:
+        flash("Email nie może być pusty!")
+        return redirect('load_reset')
+
+    email = request.form.get('email')
+    if len(email) < EMAIL_MIN_LENGTH or len(email) > EMAIL_MAX_LENGTH:
+        flash("Niepoprawny email, popraw go i spróbuj ponownie!")
+        return redirect('load_reset')
+    if not re.search('[^@]+@[^@]+\.[^@]+', email):
+        flash("Niepoprawny email, popraw go i spróbuj ponownie!")
+        return redirect('load_reset')
+
+    if is_in_db(email):
+        if is_resetting(email):
+            flash("Niepoprawny email, popraw go i spróbuj ponownie!")
+            return redirect('load_reset')
+
+        reset_id = uuid4().hex + uuid4().hex  # secrets.token_hex(60)
+        experience_date = datetime.utcnow() + timedelta(hours=24)
+        is_success = query_db('INSERT INTO resets (email, reset_id, end_time) VALUES (?, ?, ?);', [
+            email, reset_id, experience_date])
+        if is_success:
+            reset_link = url_for('handle_reset_request') + '/' + reset_id
+            send_link_to_user_via_email(email, reset_link)
+            flash("Link do zresetowania hasła został wysłany na twój email!")
+            return redirect('load_reset')
+        else:
+            flash("Podczas resetowania hasła wystąpił błąd!")
+            return redirect('load_reset')
+    else:
+        flash("Na podany adres email wysłano link do zresetowania hasła.")
+        return redirect('load_reset')
+
+
+def is_in_db(email):
+    res = select_from_db(
+        "SELECT id FROM users WHERE email = ?", [email])
+    return res != None
+
+
+def is_resetting(email):
+    res = select_from_db(
+        "SELECT id FROM resets WHERE email = ?", [email])
+    print(res)
+    return res != None
+
+
+def send_link_to_user_via_email(email, reset_link):
+    logging.info(f'Wysyłam link {reset_link} pod {email}')
     # TODO
-    return
 
 
 # USER CHANGES PASSWORD

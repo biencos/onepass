@@ -7,3 +7,4 @@ Werkzeug==0.15.1
 python-dotenv
 bcrypt
 Flask-Limiter
+uuid
