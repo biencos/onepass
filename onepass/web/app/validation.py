@@ -1,21 +1,9 @@
 import os
-import logging
 import re
-import sqlite3 as sql
-from time import sleep
-from datetime import datetime, timedelta
-from random import randint
 
-from flask import render_template, g, request, make_response, flash, url_for, session, jsonify
+from flask import flash
 from dotenv import load_dotenv
-from bcrypt import hashpw, gensalt, checkpw
-from flask_limiter import Limiter
-from flask_limiter.util import get_remote_address
-from uuid import uuid4
 
-from app import app
-from .models.aes import AESCipher
-import validation as v
 import db_manager as db
 
 
@@ -30,118 +18,82 @@ PASSWORD_MAX_LENGTH = int(os.getenv("PASSWORD_MAX_LENGTH"))
 SERVICE_NAME_MIN_LENGTH = int(os.getenv("SERVICE_NAME_MIN_LENGTH"))
 SERVICE_NAME_MAX_LENGTH = int(os.getenv("SERVICE_NAME_MAX_LENGTH"))
 
-limiter = Limiter(
-    app,
-    key_func=get_remote_address,
-    default_limits=[os.getenv("LIMIT_PER_DAY"), os.getenv("LIMIT_PER_MINUTE")]
-)
-app.secret_key = os.getenv("SECRET_KEY")
-logging.basicConfig(level=logging.INFO)
-
-
-# DB
-def get_db():
-    db = getattr(g, '_database', None)
-    if db is None:
-        db = g._database = sql.connect(os.getenv("DATABASE"))
-
-    try:
-        db.execute('CREATE TABLE users(id INTEGER PRIMARY KEY, username TEXT NOT NULL UNIQUE, email TEXT NOT NULL UNIQUE, password TEXT NOT NULL, master_password TEXT NOT NULL)')
-    except sql.OperationalError:
-        pass
-    try:
-        db.execute(
-            'CREATE TABLE passwords(id INTEGER PRIMARY KEY, username TEXT NOT NULL, name TEXT NOT NULL, password TEXT NOT NULL)')
-    except sql.OperationalError:
-        pass
-    try:
-        db.execute(
-            'CREATE TABLE attempts(id INTEGER PRIMARY KEY, username TEXT NOT NULL, ip_address TEXT NOT NULL, time timestamp)')
-    except sql.OperationalError:
-        pass
-    try:
-        db.execute(
-            'CREATE TABLE resets(id INTEGER PRIMARY KEY, email TEXT NOT NULL UNIQUE, reset_id TEXT NOT NULL, end_time timestamp)')
-    except sql.OperationalError:
-        pass
-    return db
-
-
-def query_db(query, values):
-    try:
-        db = get_db()
-        db.cursor().execute(query, values)
-        db.commit()
-        return True
-    except:
-        return False
-
-
-def select_from_db(query, values, mode="one"):
-    try:
-        if not mode in ["one", "all"]:
-            print("Nieprawidłowy tryb")
-            return None
-
-        db = get_db()
-        if mode == "one":
-            rows = db.execute(query, values).fetchone()
-        else:
-            rows = db.execute(query, values).fetchall()
-        return rows
-    except:
-        return None
-
-
-@ app.teardown_appcontext
-def close_connection(exception):
-    db = getattr(g, '_database', None)
-    if db is not None:
-        db.close()
-
-
-# HOME
-@ app.route('/')
-def load_home():
-    return render_template("home.html")
-
 
 # REGISTER
-@ app.route('/register')
-def load_register():
-    return render_template("register.html")
+def is_empty(form):
+    empty_fields = [f for f in form.values() if not f]
+    if len(empty_fields) != 0:
+        flash("Aby zarejestrować się, musisz wypełnić wszystkie pola!")
+        return True
+    return False
 
 
-@ app.route('/register', methods=['POST'])
-def register():
-    if v.is_empty(request.form):
-        return redirect('load_register')
-
-    user = {}
-    for n in ['username', 'email', 'password', 'password1', 'master_password', 'master_password1']:
-        user[n] = request.form.get(n)
-
-    if not v.is_user_valid(user):
-        return redirect('load_register')
-
-    hashed, mhashed = hash_pass(user['password']), hash_pass(user['master'])
-    if not db.register_user(user['username'], user['email'], hashed, mhashed):
-        flash(f"Podczas rejestracji wystąpił błąd! Spróbuj ponownie później.")
-        return redirect('load_register')
-    return redirect('load_login')
+def is_username_valid(username):
+    if len(username) < USERNAME_MIN_LENGTH:
+        flash("Nazwa użytkownika jest zbyt krótka")
+        return False
+    if len(username) > USERNAME_MAX_LENGTH:
+        flash("Nazwa użytkownika jest zbyt długa")
+        return False
+    if not re.match('^[a-z]+$', username):
+        flash("Nazwa użytkownika może składać się tylko z małych liter!")
+        return False
+    return True
 
 
-def redirect(destination_name, status=302):
-    response = make_response('', status)
-    response.headers['Location'] = url_for(destination_name)
-    return response
+def is_email_valid(email):
+    if len(email) < EMAIL_MIN_LENGTH:
+        flash("Email jest zbyt krótki")
+        return False
+    if len(email) > EMAIL_MAX_LENGTH:
+        flash(f"Email nie może być dłuższy niż {EMAIL_MAX_LENGTH} znaków")
+        return False
+    if not re.search('[^@]+@[^@]+\.[^@]+', email):
+        flash("Niepoprawny email, popraw go i spróbuj ponownie!")
+        return False
+    return True
 
 
-def hash_pass(password, salt_length=SALT_LENGTH):
-    password, salt = password.encode(),  gensalt(salt_length)
-    return hashpw(password, salt)
+def is_password_safe(password, prfx):
+    if not password:
+        flash(f"Hasło {prfx} nie może być puste!")
+        return False
+    if len(password) < PASSWORD_MIN_LENGTH:
+        flash(
+            f"Hasło {prfx} musi mieć conajmniej {PASSWORD_MIN_LENGTH} znaków!")
+        return False
+    if len(password) > PASSWORD_MAX_LENGTH:
+        flash(f"Hasło {prfx} jest zbyt długie!")
+        return False
+    regex = ("^(?=.*[a-z])(?=." + "*[A-Z])(?=.*\\d)" +
+             "(?=.*[-+_!@#$%^&*., ?]).+$")
+    if not re.search(re.compile(regex), password):
+        flash(f"Hasło {prfx} musi składać się przynajmniej: z jednej dużej litery, z jednego małego znaku, z jednej cyfry oraz z jednego znaku specjalnego!")
+        return False
+    return True
 
 
+def is_passwords_safe(password, password1, prfx):
+    if not is_password_safe(password, prfx):
+        return False
+    if password != password1:
+        flash(f"Podane hasła {prfx} nie pasują do siebie!")
+        return False
+    return True
+
+
+def is_user_valid(user):
+    if not is_username_valid(user['username']) or not is_email_valid(user['email']):
+        return False
+    if not is_passwords_safe(user['password'], user['password1'], "") or not is_passwords_safe(user['master1'], user['master1'], "główne"):
+        return False
+    if db.is_registred(user['username']):
+        flash("Niepoprawna nazwa użytkownika, popraw ją i spróbuj ponownie")
+        return False
+    return True
+
+
+""" 
 # LOGIN
 @ app.route('/login')
 def load_login():
@@ -169,24 +121,19 @@ def login():
 
     if is_registred(username):
         password = password.encode()
-        res = select_from_db(
-            'SELECT password FROM users WHERE username = ?', [username])
-        hashed = res[0]
-        # hashed = get_user_password(username)
-        if hashed:
-            if checkpw(password, hashed):
-                # Użytkownik się zalogował
-                flash(f"Witaj z powrotem {username}")
-                session["username"] = username
-                session["logged-at"] = datetime.now().strftime("%Y-%m-%dT%H:%M:%S.%f")
-                return redirect('load_dashboard')
-            else:
-                # Użytkownik się pomylił, albo przeprowadzono atak na niego
-                query_db('INSERT INTO attempts (username, ip_address, time) VALUES (?, ?, ?);', [
-                    username, get_remote_address(), datetime.now()])
-                # save_attempt()
-                wait_some_time()
-                return redirect('load_login')
+        hashed = get_user_password(username)
+        if checkpw(password, hashed):
+            # Użytkownik się zalogował
+            flash(f"Witaj z powrotem {username}")
+            session["username"] = username
+            session["logged-at"] = datetime.now().strftime("%Y-%m-%dT%H:%M:%S.%f")
+            return redirect('load_dashboard')
+        else:
+            # Użytkownik się pomylił, albo przeprowadzono atak na niego
+            query_db('INSERT INTO attempts (username, ip_address, time) VALUES (?, ?, ?);', [
+                username, get_remote_address(), datetime.now()])
+            wait_some_time()
+            return redirect('load_login')
     else:
         # Użytkownika nie ma w db
         flash("Nieprawidłowe dane logowania!")
@@ -197,6 +144,12 @@ def login():
 def wait_some_time(l1=200, l2=900):
     d = randint(l1, l2)/1000
     sleep(d)
+
+
+def get_user_password(username):
+    res = select_from_db(
+        'SELECT password FROM users WHERE username = ?', [username])
+    return res[0]
 
 
 # RESET
@@ -221,6 +174,7 @@ def handle_reset_request():
         flash("Niepoprawny email, popraw go i spróbuj ponownie!")
         return redirect('load_reset')
 
+    # if is_email_registered(email):
     if is_in_db(email):
         if is_resetting(email):
             flash("Niepoprawny email, popraw go i spróbuj ponownie!")
@@ -230,7 +184,6 @@ def handle_reset_request():
         experience_date = datetime.utcnow() + timedelta(hours=24)
         is_success = query_db('INSERT INTO resets (email, reset_id, end_time) VALUES (?, ?, ?);', [
             email, reset_id, experience_date])
-        # if save_reset_request(email, reset_id, experience_date):
         if is_success:
             reset_link = url_for('handle_reset_request') + '/' + reset_id
             send_link_to_user_via_email(email, reset_link)
@@ -265,7 +218,6 @@ def send_link_to_user_via_email(email, reset_link):
 # USER CHANGES PASSWORD
 @ app.route('/reset/<reset_id>', methods=['GET'])
 def load_reset_with_token(reset_id):
-    # if is_allowed_for_resetting(reset_id) and is_reset_link_valid(reset_id):
     if is_allowed(reset_id) and is_valid(reset_id):
         return render_template("reset_with_token.html")
     else:
@@ -463,3 +415,4 @@ def get_pass():
 def decrypt_password(master_password, password):
     c = AESCipher(key=master_password)
     return c.decrypt(password)
+ """
