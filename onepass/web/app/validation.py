@@ -23,7 +23,7 @@ SERVICE_NAME_MAX_LENGTH = int(os.getenv("SERVICE_NAME_MAX_LENGTH"))
 def is_empty(form):
     empty_fields = [f for f in form.values() if not f]
     if len(empty_fields) != 0:
-        flash("Aby zarejestrować się, musisz wypełnić wszystkie pola!")
+        flash("W twoim formularzu są puste pola! Wypełnij go i spróbuj ponownie")
         return True
     return False
 
@@ -93,65 +93,20 @@ def is_user_valid(user):
     return True
 
 
-""" 
 # LOGIN
-@ app.route('/login')
-def load_login():
-    return render_template("login.html")
-
-
-@ app.route('/login', methods=['POST'])
-def login():
-    empty_fields = [f for f in request.form.values() if not f]
-    if len(empty_fields) != 0:
-        flash("Nazwa użytkownika ani hasło nie może być puste!")
-        wait_some_time()
-        return redirect('load_login')
-
-    username = request.form.get('username')
-    password = request.form.get('password')
+def is_username_login_valid(username):
     if len(username) < USERNAME_MIN_LENGTH or len(username) > USERNAME_MAX_LENGTH:
-        flash("Podano niepoprawną nazwę użytkownika!")
-        wait_some_time()
-        return redirect('load_login')
+        return False
+    return True
+
+
+def is_password_login_valid(password):
     if len(password) < PASSWORD_MIN_LENGTH or len(password) > PASSWORD_MAX_LENGTH:
-        flash("Podano niepoprawne hasło!")
-        wait_some_time()
-        return redirect('load_login')
-
-    if is_registred(username):
-        password = password.encode()
-        hashed = get_user_password(username)
-        if checkpw(password, hashed):
-            # Użytkownik się zalogował
-            flash(f"Witaj z powrotem {username}")
-            session["username"] = username
-            session["logged-at"] = datetime.now().strftime("%Y-%m-%dT%H:%M:%S.%f")
-            return redirect('load_dashboard')
-        else:
-            # Użytkownik się pomylił, albo przeprowadzono atak na niego
-            query_db('INSERT INTO attempts (username, ip_address, time) VALUES (?, ?, ?);', [
-                username, get_remote_address(), datetime.now()])
-            wait_some_time()
-            return redirect('load_login')
-    else:
-        # Użytkownika nie ma w db
-        flash("Nieprawidłowe dane logowania!")
-        wait_some_time()
-        return redirect('load_login')
+        return False
+    return True
 
 
-def wait_some_time(l1=200, l2=900):
-    d = randint(l1, l2)/1000
-    sleep(d)
-
-
-def get_user_password(username):
-    res = select_from_db(
-        'SELECT password FROM users WHERE username = ?', [username])
-    return res[0]
-
-
+""" 
 # RESET
 @ app.route('/reset')
 @ limiter.exempt

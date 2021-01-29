@@ -11,18 +11,18 @@ def register_user(username, email, hashed, master_hashed):
     return query_db('INSERT INTO users (username, email, password, master_password) VALUES (?, ?, ?, ?)', [username, email, hashed, master_hashed])
 
 
-""" # LOGIN
-def save_attempt(username):
-    return query_db('INSERT INTO attempts (username, ip_address, time) VALUES (?, ?, ?);', [username, get_remote_address(), datetime.now()])
-
-
+# LOGIN
 def get_user_password(username):
     res = select_from_db(
         'SELECT password FROM users WHERE username = ?', [username])
     return res[0]
 
 
-# RESET
+def save_attempt(username, ip_address, date):
+    return query_db('INSERT INTO attempts (username, ip_address, time) VALUES (?, ?, ?);', [username, ip_address, date])
+
+
+""" # RESET
 def is_email_registered(email):
     res = select_from_db(
         "SELECT id FROM users WHERE email = ?", [email])

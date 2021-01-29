@@ -152,46 +152,35 @@ def load_login():
 def login():
     empty_fields = [f for f in request.form.values() if not f]
     if len(empty_fields) != 0:
-        flash("Nazwa użytkownika ani hasło nie może być puste!")
-        wait_some_time()
-        return redirect('load_login')
+        handle_wrong_login("Nazwa użytkownika ani hasło nie może być puste!")
 
     username = request.form.get('username')
     password = request.form.get('password')
-    if len(username) < USERNAME_MIN_LENGTH or len(username) > USERNAME_MAX_LENGTH:
-        flash("Podano niepoprawną nazwę użytkownika!")
-        wait_some_time()
-        return redirect('load_login')
-    if len(password) < PASSWORD_MIN_LENGTH or len(password) > PASSWORD_MAX_LENGTH:
-        flash("Podano niepoprawne hasło!")
-        wait_some_time()
-        return redirect('load_login')
+    if v.is_username_login_valid(username):
+        handle_wrong_login("Podano niepoprawną nazwę użytkownika!")
+    if v.is_password_login_valid(password):
+        handle_wrong_login("Podano niepoprawne hasło!")
 
-    if is_registred(username):
+    if db.is_registred(username):
         password = password.encode()
-        res = select_from_db(
-            'SELECT password FROM users WHERE username = ?', [username])
-        hashed = res[0]
-        # hashed = get_user_password(username)
+        hashed = db.get_user_password(username)
         if hashed:
             if checkpw(password, hashed):
-                # Użytkownik się zalogował
                 flash(f"Witaj z powrotem {username}")
                 session["username"] = username
                 session["logged-at"] = datetime.now().strftime("%Y-%m-%dT%H:%M:%S.%f")
                 return redirect('load_dashboard')
             else:
-                # Użytkownik się pomylił, albo przeprowadzono atak na niego
-                query_db('INSERT INTO attempts (username, ip_address, time) VALUES (?, ?, ?);', [
-                    username, get_remote_address(), datetime.now()])
-                # save_attempt()
-                wait_some_time()
-                return redirect('load_login')
+                db.save_attempt(username, get_remote_address(), datetime.now())
+                return handle_wrong_login("Nieprawidłowe dane logowania!")
     else:
-        # Użytkownika nie ma w db
-        flash("Nieprawidłowe dane logowania!")
-        wait_some_time()
-        return redirect('load_login')
+        return handle_wrong_login("Nieprawidłowe dane logowania!")
+
+
+def handle_wrong_login(msg):
+    flash(msg)
+    wait_some_time()
+    return redirect('load_login')
 
 
 def wait_some_time(l1=200, l2=900):
