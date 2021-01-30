@@ -22,14 +22,14 @@ def save_attempt(username, ip_address, date):
     return query_db('INSERT INTO attempts (username, ip_address, time) VALUES (?, ?, ?);', [username, ip_address, date])
 
 
-""" # RESET
+# RESET
 def is_email_registered(email):
     res = select_from_db(
         "SELECT id FROM users WHERE email = ?", [email])
     return res != None
 
 
-def is_resetting(email):
+def is_resetting_already(email):
     res = select_from_db(
         "SELECT id FROM resets WHERE email = ?", [email])
     print(res)
@@ -37,4 +37,4 @@ def is_resetting(email):
 
 
 def save_reset_request(email, reset_id, experience_date):
-    return query_db('INSERT INTO resets (email, reset_id, end_time) VALUES (?, ?, ?);', [email, reset_id, experience_date]) """
+    return query_db('INSERT INTO resets (email, reset_id, end_time) VALUES (?, ?, ?);', [email, reset_id, experience_date])

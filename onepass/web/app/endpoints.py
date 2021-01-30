@@ -197,30 +197,21 @@ def load_reset():
 
 @ app.route('/reset', methods=['POST'])
 def handle_reset_request():
-    empty_fields = [f for f in request.form.values() if not f]
-    if len(empty_fields) != 0:
-        flash("Email nie może być pusty!")
+    if v.is_empty(request.form):
         return redirect('load_reset')
 
     email = request.form.get('email')
-    if len(email) < EMAIL_MIN_LENGTH or len(email) > EMAIL_MAX_LENGTH:
-        flash("Niepoprawny email, popraw go i spróbuj ponownie!")
-        return redirect('load_reset')
-    if not re.search('[^@]+@[^@]+\.[^@]+', email):
-        flash("Niepoprawny email, popraw go i spróbuj ponownie!")
+    if not v.is_email_valid(email):
         return redirect('load_reset')
 
-    if is_in_db(email):
-        if is_resetting(email):
+    if db.is_email_registered(email):
+        if db.is_resetting_already(email):
             flash("Niepoprawny email, popraw go i spróbuj ponownie!")
             return redirect('load_reset')
 
-        reset_id = uuid4().hex + uuid4().hex  # secrets.token_hex(60)
+        reset_id = uuid4().hex + uuid4().hex
         experience_date = datetime.utcnow() + timedelta(hours=24)
-        is_success = query_db('INSERT INTO resets (email, reset_id, end_time) VALUES (?, ?, ?);', [
-            email, reset_id, experience_date])
-        # if save_reset_request(email, reset_id, experience_date):
-        if is_success:
+        if db.save_reset_request(email, reset_id, experience_date):
             reset_link = url_for('handle_reset_request') + '/' + reset_id
             send_link_to_user_via_email(email, reset_link)
             flash("Link do zresetowania hasła został wysłany na twój email!")
@@ -231,19 +222,6 @@ def handle_reset_request():
     else:
         flash("Na podany adres email wysłano link do zresetowania hasła.")
         return redirect('load_reset')
-
-
-def is_in_db(email):
-    res = select_from_db(
-        "SELECT id FROM users WHERE email = ?", [email])
-    return res != None
-
-
-def is_resetting(email):
-    res = select_from_db(
-        "SELECT id FROM resets WHERE email = ?", [email])
-    print(res)
-    return res != None
 
 
 def send_link_to_user_via_email(email, reset_link):
@@ -305,13 +283,13 @@ def reset_password(reset_id):
     email = res[0]
     password = request.form.get('password')
     password1 = request.form.get('password1')
-    if not is_password_safe(password, "Hasło"):
-        return redirect('reset_password' + '/' + reset_id)
+    # if not is_password_safe(password, "Hasło"):
+    #   return redirect('reset_password' + '/' + reset_id)
     if password != password1:
         flash("Podane hasła nie pasują do siebie!")
         return redirect('reset_password' + '/' + reset_id)
 
-    hashed = prepare_password(password)
+    hashed = hash_pass(password)
     is_success = query_db(
         'UPDATE users SET password = ? WHERE email = ?', [hashed, email])
     if not is_success:
