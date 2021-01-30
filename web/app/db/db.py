@@ -4,8 +4,6 @@ import sqlite3 as sql
 from flask import g
 from dotenv import load_dotenv
 
-from app import app
-
 
 load_dotenv()
 DB_PATH = os.getenv("DATABASE")
@@ -67,9 +65,3 @@ def select_from_db(query, values, mode="one"):
     except:
         return None
 
-
-@ app.teardown_appcontext
-def close_connection(exception):
-    db = getattr(g, '_database', None)
-    if db is not None:
-        db.close()

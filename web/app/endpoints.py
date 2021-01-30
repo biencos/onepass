@@ -15,8 +15,8 @@ from uuid import uuid4
 
 from app import app
 from .models.aes import AESCipher
-import validation as v
-import db_manager as db
+from .models.validation import Validator
+from .db.db_manager import DbManager
 
 
 load_dotenv()
@@ -30,6 +30,9 @@ PASSWORD_MAX_LENGTH = int(os.getenv("PASSWORD_MAX_LENGTH"))
 SERVICE_NAME_MIN_LENGTH = int(os.getenv("SERVICE_NAME_MIN_LENGTH"))
 SERVICE_NAME_MAX_LENGTH = int(os.getenv("SERVICE_NAME_MAX_LENGTH"))
 
+db = DbManager()
+v = Validator()
+
 limiter = Limiter(
     app,
     key_func=get_remote_address,
@@ -38,7 +41,7 @@ limiter = Limiter(
 app.secret_key = os.getenv("SECRET_KEY")
 logging.basicConfig(level=logging.INFO)
 
-
+""" 
 # DB
 def get_db():
     db = getattr(g, '_database', None)
@@ -90,14 +93,13 @@ def select_from_db(query, values, mode="one"):
             rows = db.execute(query, values).fetchall()
         return rows
     except:
-        return None
-
+        return None """
 
 @ app.teardown_appcontext
 def close_connection(exception):
-    db = getattr(g, '_database', None)
-    if db is not None:
-        db.close()
+    d = getattr(g, '_database', None)
+    if d is not None:
+        d.close()
 
 
 # HOME
@@ -297,8 +299,7 @@ def load_passwords():
         flash("Ta akcja wymaga zalogowania!")
         return redirect('load_login', 401)
 
-    res = select_from_db(
-        'SELECT name FROM passwords WHERE username = ?', [username], "all")
+    res = db.get_user_passwords(username) 
 
     response = {}
     if res != None:
