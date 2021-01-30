@@ -364,19 +364,16 @@ def get_pass():
         return redirect('load_login', 401)
 
     ERROR_MESSAGE = "Podczas odszyfrowywania wystąpił błąd, czy jesteś pewien że poprawnie wypełniłeś wszystkie pola?"
-    empty_fields = [f for f in request.form.values() if not f]
-    if len(empty_fields) != 0:
+    if v.is_empty(request.form):
         return ERROR_MESSAGE, 400
 
     service_name = request.form.get("master-name")
     master_password = request.form.get("master-password")
-
-    if len(service_name) < SERVICE_NAME_MIN_LENGTH or len(service_name) > SERVICE_NAME_MAX_LENGTH or len(master_password) < PASSWORD_MIN_LENGTH or len(master_password) > PASSWORD_MAX_LENGTH:
+    if not v.is_service_name_valid(service_name) or not v.is_password_safe(master_password, ""):
         return ERROR_MESSAGE, 400
-
+    
     if verify_master(username, master_password):
-        res = select_from_db(
-            'SELECT password FROM passwords WHERE username = ? AND name = ?', [username, service_name])
+        res = db.get_user_pass(username, service_name)
         if res != None:
             response = {}
             response['pass'] = decrypt_password(master_password, res[0])

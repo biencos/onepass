@@ -77,8 +77,12 @@ class DbManager:
         return select_from_db('SELECT name FROM passwords WHERE username = ?', [username], "all")
 
     # ADD PASSWORD
-    def add_user_password(self, username, name, password):
-        return query_db('INSERT INTO passwords (username, name, password) VALUES (?, ?, ?)', [username, name, password])
+    def add_user_password(self, username, service_name, password):
+        return query_db('INSERT INTO passwords (username, name, password) VALUES (?, ?, ?)', [username, service_name, password])
     
     def get_user_master_password(self, username):
         return select_from_db('SELECT master_password FROM users WHERE username = ?', [username])
+    
+    # GET PASS
+    def get_user_pass(self, username, service_name):
+        return select_from_db('SELECT password FROM passwords WHERE username = ? AND name = ?', [username, service_name])
