@@ -232,50 +232,23 @@ def send_link_to_user_via_email(email, reset_link):
 # USER CHANGES PASSWORD
 @ app.route('/reset/<reset_id>', methods=['GET'])
 def load_reset_with_token(reset_id):
-    # if is_allowed_for_resetting(reset_id) and is_reset_link_valid(reset_id):
-    if is_allowed(reset_id) and is_valid(reset_id):
+    if db.is_allowed_for_resetting(reset_id) and db.is_reset_link_valid(reset_id):
         return render_template("reset_with_token.html")
     else:
         return "", 401
 
 
-def is_allowed(reset_id):
-    res = select_from_db(
-        "SELECT id FROM resets WHERE reset_id = ?", [reset_id])
-    return res != None
-
-
-def is_valid(reset_id):
-    res = select_from_db(
-        "SELECT end_time FROM resets WHERE reset_id = ?", [reset_id])
-    if res != None:
-        experience_date = datetime.strptime(res[0], '%Y-%m-%d %H:%M:%S.%f')
-        now = datetime.now()
-        diff = experience_date - now
-        days, seconds = diff.days, diff.seconds
-        hours = days * 24 + seconds // 3600
-
-        if hours > 0:
-            return True
-        else:
-            return False
-    else:
-        return False
-
-
 @ app.route('/reset/<reset_id>', methods=['POST'])
 def reset_password(reset_id):
-    if not is_allowed(reset_id):
+    if not db.is_allowed_for_resetting(reset_id):
         flash("Wystąpił błąd!")
         return redirect('load_home')
-    if not is_valid(reset_id):
+    if not db.is_reset_link_valid(reset_id):
+        db.delete_reset_link(reset_id)
         flash("Wystąpił błąd!")
-        query_db(
-            'DELETE FROM resets WHERE reset_id = ?', [reset_id])
         return redirect('load_home')
 
-    res = select_from_db(
-        "SELECT email FROM resets WHERE reset_id = ?", [reset_id])
+    res = db.get_email_with_reset_id(reset_id)
     if res == None:
         flash("Wystąpił błąd!")
         return redirect('load_home')
@@ -283,24 +256,15 @@ def reset_password(reset_id):
     email = res[0]
     password = request.form.get('password')
     password1 = request.form.get('password1')
-    # if not is_password_safe(password, "Hasło"):
-    #   return redirect('reset_password' + '/' + reset_id)
-    if password != password1:
-        flash("Podane hasła nie pasują do siebie!")
+
+    if not v.is_passwords_safe(password, password1, ""):
         return redirect('reset_password' + '/' + reset_id)
 
     hashed = hash_pass(password)
-    is_success = query_db(
-        'UPDATE users SET password = ? WHERE email = ?', [hashed, email])
-    if not is_success:
+    if not db.change_user_password(email, hashed):
         flash(f"Podczas zmiany hasła wystąpił błąd! Spróbuj ponownie później.")
         return redirect('load_home')
-    is_success = query_db(
-        'DELETE FROM resets WHERE reset_id = ?', [reset_id])
-    if not is_success:
-        flash(f"Podczas zmiany hasła wystąpił błąd! Spróbuj ponownie później.")
-        return redirect('load_home')
-
+    db.delete_reset_link(reset_id)
     flash(f"Twoje hasło zostało zmienione")
     return redirect('load_login')
 
