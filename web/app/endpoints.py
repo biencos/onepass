@@ -300,7 +300,6 @@ def load_passwords():
         return redirect('load_login', 401)
 
     res = db.get_user_passwords(username) 
-
     response = {}
     if res != None:
         passes = []
@@ -322,22 +321,19 @@ def add_pass():
         return redirect('load_login', 401)
 
     ERROR_MESSAGE = "Podczas dodawania wystąpił błąd, czy jesteś pewien że poprawnie wypełniłeś wszystkie pola?"
-    empty_fields = [f for f in request.form.values() if not f]
-    if len(empty_fields) != 0:
+    if v.is_empty(request.form):
         return ERROR_MESSAGE, 400
 
     name = request.form.get("new-name")
     password = request.form.get("new-password")
     master_password = request.form.get("master-pass")
 
-    if len(name) < SERVICE_NAME_MIN_LENGTH or len(name) > SERVICE_NAME_MAX_LENGTH or len(password) < PASSWORD_MIN_LENGTH or len(password) > PASSWORD_MAX_LENGTH or len(master_password) < PASSWORD_MIN_LENGTH or len(master_password) > PASSWORD_MAX_LENGTH:
+    if not v.is_service_name_valid(name) or not v.is_password_safe(password, "") or not v.is_password_safe(master_password, "główne"):
         return ERROR_MESSAGE, 400
 
     if verify_master(username, master_password):
         password = encrypt_password(password, master_password)
-        q = 'INSERT INTO passwords (username, name, password) VALUES (?, ?, ?)'
-        v = [username, name, password]
-        if query_db(q, v):
+        if db.add_user_password(username, name, password):
             return "Dodano nowe hasło", 201
         else:
             return ERROR_MESSAGE, 400
@@ -347,8 +343,7 @@ def add_pass():
 
 def verify_master(username, master_password):
     master_password = master_password.encode()
-    res = select_from_db(
-        'SELECT master_password FROM users WHERE username = ?', [username])
+    res = db.get_user_master_password(username)
     if res != None:
         hashed = res[0]
         if hashed:

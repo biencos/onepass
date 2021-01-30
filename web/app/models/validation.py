@@ -101,7 +101,11 @@ class Validator:
             return False
         return True
 
-
+    # ADD PASSWORD
+    def is_service_name_valid(self, name):
+        if len(name) < SERVICE_NAME_MIN_LENGTH or len(name) > SERVICE_NAME_MAX_LENGTH:
+            return False
+        return True
 """ 
 # USER CHANGES PASSWORD
 @ app.route('/reset/<reset_id>', methods=['GET'])
