@@ -1,0 +1,11 @@
+Flask==1.0.2
+uWSGI==2.0.18
+Jinja2==2.10
+MarkupSafe==1.1.1
+Click==7.0
+Werkzeug==0.15.1
+python-dotenv
+bcrypt
+Flask-Limiter
+uuid
+pycrypto

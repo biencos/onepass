@@ -1,0 +1,5 @@
+.env
+*.crt
+*.key
+__pycache__
+*.db
