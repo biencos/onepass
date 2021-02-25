@@ -19,81 +19,22 @@ from .models.validation import Validator
 from .db.db_manager import DbManager
 
 
+db, v = DbManager(), Validator()
+
 load_dotenv()
 SALT_LENGTH = int(os.getenv("SALT_LENGTH"))
-USERNAME_MIN_LENGTH = int(os.getenv("USERNAME_MIN_LENGTH"))
-USERNAME_MAX_LENGTH = int(os.getenv("USERNAME_MAX_LENGTH"))
-EMAIL_MIN_LENGTH = int(os.getenv("EMAIL_MIN_LENGTH"))
-EMAIL_MAX_LENGTH = int(os.getenv("EMAIL_MAX_LENGTH"))
-PASSWORD_MIN_LENGTH = int(os.getenv("PASSWORD_MIN_LENGTH"))
-PASSWORD_MAX_LENGTH = int(os.getenv("PASSWORD_MAX_LENGTH"))
-SERVICE_NAME_MIN_LENGTH = int(os.getenv("SERVICE_NAME_MIN_LENGTH"))
-SERVICE_NAME_MAX_LENGTH = int(os.getenv("SERVICE_NAME_MAX_LENGTH"))
-
-db = DbManager()
-v = Validator()
+LIMIT_PER_DAY = os.getenv("LIMIT_PER_DAY")
+LIMIT_PER_MINUTE = os.getenv("LIMIT_PER_MINUTE")
+SECRET_KEY = os.getenv("SECRET_KEY")
 
 limiter = Limiter(
     app,
     key_func=get_remote_address,
-    default_limits=[os.getenv("LIMIT_PER_DAY"), os.getenv("LIMIT_PER_MINUTE")]
+    default_limits=[LIMIT_PER_DAY, LIMIT_PER_MINUTE]
 )
-app.secret_key = os.getenv("SECRET_KEY")
+app.secret_key = SECRET_KEY
 logging.basicConfig(level=logging.INFO)
 
-""" 
-# DB
-def get_db():
-    db = getattr(g, '_database', None)
-    if db is None:
-        db = g._database = sql.connect(os.getenv("DATABASE"))
-
-    try:
-        db.execute('CREATE TABLE users(id INTEGER PRIMARY KEY, username TEXT NOT NULL UNIQUE, email TEXT NOT NULL UNIQUE, password TEXT NOT NULL, master_password TEXT NOT NULL)')
-    except sql.OperationalError:
-        pass
-    try:
-        db.execute(
-            'CREATE TABLE passwords(id INTEGER PRIMARY KEY, username TEXT NOT NULL, name TEXT NOT NULL, password TEXT NOT NULL)')
-    except sql.OperationalError:
-        pass
-    try:
-        db.execute(
-            'CREATE TABLE attempts(id INTEGER PRIMARY KEY, username TEXT NOT NULL, ip_address TEXT NOT NULL, time timestamp)')
-    except sql.OperationalError:
-        pass
-    try:
-        db.execute(
-            'CREATE TABLE resets(id INTEGER PRIMARY KEY, email TEXT NOT NULL UNIQUE, reset_id TEXT NOT NULL, end_time timestamp)')
-    except sql.OperationalError:
-        pass
-    return db
-
-
-def query_db(query, values):
-    try:
-        db = get_db()
-        db.cursor().execute(query, values)
-        db.commit()
-        return True
-    except:
-        return False
-
-
-def select_from_db(query, values, mode="one"):
-    try:
-        if not mode in ["one", "all"]:
-            print("Nieprawidłowy tryb")
-            return None
-
-        db = get_db()
-        if mode == "one":
-            rows = db.execute(query, values).fetchone()
-        else:
-            rows = db.execute(query, values).fetchall()
-        return rows
-    except:
-        return None """
 
 @ app.teardown_appcontext
 def close_connection(exception):
@@ -126,7 +67,8 @@ def register():
     if not v.is_user_valid(user):
         return redirect('load_register')
 
-    hashed, mhashed = hash_pass(user['password']), hash_pass(user['master'])
+    hashed, mhashed = hash_pass(
+        user['password']), hash_pass(user['master_password'])
     if not db.register_user(user['username'], user['email'], hashed, mhashed):
         flash(f"Podczas rejestracji wystąpił błąd! Spróbuj ponownie później.")
         return redirect('load_register')
@@ -152,15 +94,14 @@ def load_login():
 
 @ app.route('/login', methods=['POST'])
 def login():
-    empty_fields = [f for f in request.form.values() if not f]
-    if len(empty_fields) != 0:
+    if v.is_empty(request.form):
         handle_wrong_login("Nazwa użytkownika ani hasło nie może być puste!")
 
     username = request.form.get('username')
     password = request.form.get('password')
-    if v.is_username_login_valid(username):
+    if not v.is_username_login_valid(username):
         handle_wrong_login("Podano niepoprawną nazwę użytkownika!")
-    if v.is_password_login_valid(password):
+    if not v.is_password_login_valid(password):
         handle_wrong_login("Podano niepoprawne hasło!")
 
     if db.is_registred(username):
@@ -275,12 +216,10 @@ def reset_password(reset_id):
 @ app.route('/dashboard')
 @ limiter.exempt
 def load_dashboard():
-    username = session.get("username")
-    if username:
-        return render_template('dashboard.html')
-    else:
+    if not session.get("username"):
         flash("Ta akcja wymaga zalogowania!")
         return redirect('load_login')
+    return render_template('dashboard.html')
 
 
 # LOGOUT
@@ -299,7 +238,7 @@ def load_passwords():
         flash("Ta akcja wymaga zalogowania!")
         return redirect('load_login', 401)
 
-    res = db.get_user_passwords(username) 
+    res = db.get_user_passwords(username)
     response = {}
     if res != None:
         passes = []
@@ -371,7 +310,7 @@ def get_pass():
     master_password = request.form.get("master-password")
     if not v.is_service_name_valid(service_name) or not v.is_password_safe(master_password, ""):
         return ERROR_MESSAGE, 400
-    
+
     if verify_master(username, master_password):
         res = db.get_user_pass(username, service_name)
         if res != None:

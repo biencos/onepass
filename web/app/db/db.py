@@ -14,7 +14,7 @@ def get_db():
     if db is None:
         db = g._database = sql.connect(DB_PATH)
 
-    create_tables(db)
+    db = create_tables(db)
     return db
 
 
@@ -38,6 +38,7 @@ def create_tables(db):
             'CREATE TABLE resets(id INTEGER PRIMARY KEY, email TEXT NOT NULL UNIQUE, reset_id TEXT NOT NULL, end_time timestamp)')
     except sql.OperationalError:
         pass
+    return db
 
 
 def query_db(query, values):
@@ -64,4 +65,3 @@ def select_from_db(query, values, mode="one"):
         return rows
     except:
         return None
-
