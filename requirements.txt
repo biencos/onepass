@@ -1,0 +1,4 @@
+python-dotenv
+pycrypto
+bcrypt
+uuid
