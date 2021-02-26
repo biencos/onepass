@@ -40,7 +40,7 @@ def main():
         print_passwords(get_passwords(username))
 
         LOGIN_ACTIONS = ['show passwords',
-                         'add password', 'decrypt password',  'exit']
+                         'add password', 'decrypt password', 'decrypt all passwords',  'exit']
         while 0 < selected < len(LOGIN_ACTIONS):
             print("\n")
             print_actions(LOGIN_ACTIONS, "-")
@@ -53,6 +53,9 @@ def main():
                 start_adding_password(username)
             elif selected == 3:
                 start_decrypting_password(username)
+            elif selected == 4:
+                passwords = get_passwords(username)
+                start_decrypting_all_passwords(username, passwords)
             else:
                 print(f"{SA}See you next time")
                 sys.exit(0)
@@ -78,12 +81,12 @@ def get_selected_option(inp, inp_limit, inp_limit1):
     return int(inp)
 
 
-def print_passwords(passwords):
+def print_passwords(passwords, decoded=False):
     if len(passwords) > 0:
         print(
             f"{TA}Service Name\tService Url\tUsername\tPassword\t[ Password ID ]")
         for p in passwords:
-            sp = "*" * 8
+            sp = p["service_password"] if decoded else "*" * 8
             print(
                 f'{TA}{p["service_name"]}\t\t{p["service_url"]}\t{p["service_username"]}\t{sp}\t[ {p["password_id"]} ]')
     else:
@@ -209,6 +212,20 @@ def verify_master(username, master_password):
     if hashed != None:
         return checkpw(master_password, hashed)
     return False
+
+
+def start_decrypting_all_passwords(username, passwords):
+    print(f"{HA}Decrypt All Passwords")
+    master_password = getpass("Master Password: ")
+    if not verify_master(username, master_password):
+        print("Error! Wrong Master Password")
+        return
+
+    for p in passwords:
+        password_id = p["password_id"]
+        encrypted = get_password(username, master_password, password_id)
+        p["service_password"] = encrypted
+    print_passwords(passwords, True)
 
 
 def start_decrypting_password(username):
