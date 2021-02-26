@@ -89,9 +89,8 @@ def print_passwords(passwords):
     else:
         print(f"{HA}There is no passwords yet.")
 
+
 # REGISTER
-
-
 def start_register():
     print(f"{HA}Sign Up")
     print('Enter your credentials\n')
@@ -176,7 +175,17 @@ def start_adding_password(username):
     service_password1 = getpass("Repeat Password: ")
     password_id = str(uuid.uuid4())[0:6]
 
-    # TODO - Add validation
+    if not v.is_service_name_valid(service_name):
+        print("Incorrect value of service name")
+        return
+    if not v.is_service_url_valid(service_url):
+        print("Incorrect value of service url")
+        return
+    if not v.is_service_username_valid(service_username):
+        print("Incorrect value of service username")
+        return
+    if not v.is_passwords_safe(service_password, service_password1, ""):
+        return
 
     if not add_password(username, master_password, service_name, service_url, service_username, service_password, password_id):
         print("Error! Something went wrong while adding password")

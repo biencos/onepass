@@ -9,12 +9,14 @@ from ..db.db_manager import DbManager
 load_dotenv()
 USERNAME_MIN_LENGTH = int(os.getenv("USERNAME_MIN_LENGTH"))
 USERNAME_MAX_LENGTH = int(os.getenv("USERNAME_MAX_LENGTH"))
-""" EMAIL_MIN_LENGTH = int(os.getenv("EMAIL_MIN_LENGTH"))
-EMAIL_MAX_LENGTH = int(os.getenv("EMAIL_MAX_LENGTH")) """
 PASSWORD_MIN_LENGTH = int(os.getenv("PASSWORD_MIN_LENGTH"))
 PASSWORD_MAX_LENGTH = int(os.getenv("PASSWORD_MAX_LENGTH"))
 SERVICE_NAME_MIN_LENGTH = int(os.getenv("SERVICE_NAME_MIN_LENGTH"))
 SERVICE_NAME_MAX_LENGTH = int(os.getenv("SERVICE_NAME_MAX_LENGTH"))
+SERVICE_URL_MIN_LENGTH = int(os.getenv("SERVICE_URL_MIN_LENGTH"))
+SERVICE_URL_MAX_LENGTH = int(os.getenv("SERVICE_URL_MAX_LENGTH"))
+SERVICE_USERNAME_MIN_LENGTH = int(os.getenv("SERVICE_USERNAME_MIN_LENGTH"))
+SERVICE_USERNAME_MAX_LENGTH = int(os.getenv("SERVICE_USERNAME_MAX_LENGTH"))
 DB_PATH = os.getenv("DATABASE")
 db = DbManager(DB_PATH)
 
@@ -94,5 +96,15 @@ class Validator:
     # ADD PASSWORD
     def is_service_name_valid(self, name):
         if len(name) < SERVICE_NAME_MIN_LENGTH or len(name) > SERVICE_NAME_MAX_LENGTH:
+            return False
+        return True
+
+    def is_service_url_valid(self, url):
+        if len(url) < SERVICE_NAME_MIN_LENGTH or len(url) > SERVICE_NAME_MAX_LENGTH:
+            return False
+        return True
+
+    def is_service_username_valid(self, service_username):
+        if len(service_username) < SERVICE_USERNAME_MIN_LENGTH or len(service_username) > SERVICE_USERNAME_MAX_LENGTH:
             return False
         return True
