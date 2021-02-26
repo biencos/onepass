@@ -169,23 +169,26 @@ def start_adding_password(username):
         return
 
     service_name = input("Service Name: ")
-    service_url = input("Service URL: ")
-    service_username = input("Username used in service: ")
-    service_password = getpass("Password used in service: ")
-    service_password1 = getpass("Repeat Password: ")
-    password_id = str(uuid.uuid4())[0:6]
-
     if not v.is_service_name_valid(service_name):
         print("Incorrect value of service name")
         return
+
+    service_url = input("Service URL: ")
     if not v.is_service_url_valid(service_url):
         print("Incorrect value of service url")
         return
+
+    service_username = input("Username used in service: ")
     if not v.is_service_username_valid(service_username):
         print("Incorrect value of service username")
         return
+
+    service_password = getpass("Password used in service: ")
+    service_password1 = getpass("Repeat Password: ")
     if not v.is_passwords_safe(service_password, service_password1, ""):
         return
+
+    password_id = str(uuid.uuid4())[0:6]
 
     if not add_password(username, master_password, service_name, service_url, service_username, service_password, password_id):
         print("Error! Something went wrong while adding password")
@@ -216,12 +219,13 @@ def start_decrypting_password(username):
         return
 
     password_id = input("Password ID: ")
-
-    # TODO - Add validation
+    if len(password_id) != 6:
+        print("There in no password with this id!")
+        return
 
     decrypted_password = get_password(username, master_password, password_id)
     if not decrypted_password:
-        print("Error! Something went wrong while decrypting password")
+        print("There in no password with this id!")
         return
     print("Your password is " + decrypted_password)
 
@@ -230,7 +234,6 @@ def get_password(username, master_password, password_id):
     password = db.get_user_service_password(username, password_id)
     if password != None:
         return decrypt_password(master_password, password)
-    print("There in no password with this id!")
     return None
 
 
