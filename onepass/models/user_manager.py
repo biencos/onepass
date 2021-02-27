@@ -37,3 +37,10 @@ class UserManager:
                 if checkpw(password.encode(), hashed):
                     return True
         return False
+
+    def verify_master(self, username, master_password):
+        master_password = master_password.encode()
+        hashed = self.db.get_user_master_password(username)
+        if hashed != None:
+            return checkpw(master_password, hashed)
+        return False
