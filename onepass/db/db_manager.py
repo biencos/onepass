@@ -7,7 +7,6 @@ class DbManager:
     def __init__(self, DB_PATH):
         self.db = Db(DB_PATH)
 
-    # USER
     def is_registred(self, username):
         return self.db.select_from_db('SELECT id FROM users WHERE username = ?', [username]) != None
 
@@ -20,10 +19,6 @@ class DbManager:
     def register_user(self, username, hashed, master_hashed):
         return self.db.query_db('INSERT INTO users (username, password, master_password) VALUES (?, ?, ?)', [username, hashed, master_hashed])
 
-    """ def change_user_password(self, email, hashed):
-        return self.db.query_db('UPDATE users SET password = ? WHERE email = ?', [hashed, email]) """
-
-    # PASSWORDS
     def get_user_passwords(self, username):
         return self.db.select_from_db('SELECT service_name, service_url, service_username, service_password, password_id FROM passwords WHERE username = ?', [username], "all")
 

@@ -25,7 +25,7 @@ class UserManager:
         return False
 
     def hash_pass(self, password, salt_length=SALT_LENGTH):
-        password, salt = password.encode(),  gensalt(salt_length)
+        password, salt = password.encode(), gensalt(salt_length)
         return hashpw(password, salt)
 
     def login(self, username, password):

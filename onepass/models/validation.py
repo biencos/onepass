@@ -95,20 +95,20 @@ class Validator:
             return False
         return True
 
-    def is_option_valid(self, inp, inp_limit, inp_limit1):
-        try:
-            inp = int(inp)
-        except:
-            return False
-        if inp < inp_limit or inp > inp_limit1:
-            return False
-        return True
-
     def is_password_length_valid(self, length, length_limit=8):
         try:
             length = int(length)
             if length < length_limit:
                 return False
         except:
+            return False
+        return True
+
+    def is_option_valid(self, inp, inp_limit, inp_limit1):
+        try:
+            inp = int(inp)
+        except:
+            return False
+        if inp < inp_limit or inp > inp_limit1:
             return False
         return True
