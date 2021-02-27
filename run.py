@@ -1,5 +1,4 @@
 import os
-import sys
 from getpass import getpass
 
 from dotenv import load_dotenv
