@@ -1,24 +1,20 @@
 import os
 import sys
 from getpass import getpass
-import re
-from datetime import datetime, timedelta
-from random import randint
 
 from dotenv import load_dotenv
-from bcrypt import hashpw, gensalt, checkpw
 import uuid
 
 from onepass.db.db_manager import DbManager
-from onepass.models.aes import AESCipher
 from onepass.models.validation import Validator
 from onepass.models.user_manager import UserManager
+from onepass.models.passwords_manager import PasswordsManager
+
 
 APP_NAME = "onepass"
 load_dotenv()
-db = DbManager(os.getenv("DATABASE"))
-v = Validator()
-um = UserManager(db, v)
+db, v = DbManager(os.getenv("DATABASE")), Validator()
+um, pm = UserManager(db, v), PasswordsManager(db, v)
 
 # Configurations
 HA = "\t\t\t"       # HEADER_ACAPIT
@@ -49,7 +45,6 @@ def main():
                 print("")
                 selected = get_selected_option(
                     input(":"), 1, len(LOGIN_ACTIONS))
-
                 if selected == 1:
                     start_getting_passwords(username)
                 elif selected == 2:
@@ -67,8 +62,7 @@ def main():
 def print_actions(actions, prfx):
     print(f"{HA}WHAT DO YOU WANT TO DO?")
     print("")
-    [print(f"{HA}{i+1} {prfx} {actions[i]}")
-     for i in range(len(actions))]
+    [print(f"{HA}{i+1} {prfx} {actions[i]}") for i in range(len(actions))]
 
 
 def get_selected_option(inp, inp_limit, inp_limit1):
@@ -115,33 +109,17 @@ def start_login():
 
 
 def start_getting_passwords(username):
-    passwords = get_passwords(username)
+    passwords = pm.get_passwords(username)
     if not passwords:
         print(f"{TA}There was an error during getting passwords \n")
     else:
         print_passwords(passwords)
 
 
-def get_passwords(username):
-    res = db.get_user_passwords(username)
-    if res != None:
-        passes = []
-        for r in res:
-            p = {}
-            p['service_name'] = r[0]
-            p['service_url'] = r[1]
-            p['service_username'] = r[2]
-            p['service_password'] = r[3]
-            p['password_id'] = r[4]
-            passes.append(p)
-        return passes
-    return None
-
-
 def start_adding_password(username):
     print(f"{HA}Add New Password")
     master_password = getpass("Master Password: ")
-    if not verify_master(username, master_password):
+    if not um.verify_master(username, master_password):
         print("Error! Wrong Master Password")
         return
 
@@ -167,38 +145,24 @@ def start_adding_password(username):
 
     password_id = str(uuid.uuid4())[0:6]
 
-    if not add_password(username, master_password, service_name, service_url, service_username, service_password, password_id):
+    if not pm.add_password(username, master_password, service_name, service_url, service_username, service_password, password_id):
         print("Error! Something went wrong while adding password")
         return
     print("New password was succesfully added!")
 
 
-def add_password(username, master_password, service_name, service_url, service_username, service_password, password_id):
-    encrypted = encrypt_password(service_password, master_password)
-    if db.add_user_password(username, service_name, service_url, service_username, encrypted, password_id):
-        return True
-    return False
-
-
-def verify_master(username, master_password):
-    master_password = master_password.encode()
-    hashed = db.get_user_master_password(username)
-    if hashed != None:
-        return checkpw(master_password, hashed)
-    return False
-
-
 def start_decrypting_password(username):
     print(f"{HA}Decrypt Password")
     master_password = getpass("Master Password: ")
-    if not verify_master(username, master_password):
+    if not um.verify_master(username, master_password):
         print("Error! Wrong Master Password")
         return
     password_id = input("Password ID: ")
     if len(password_id) != 6:
         print("There in no password with this id!")
         return
-    decrypted_password = get_password(username, master_password, password_id)
+    decrypted_password = pm.get_password(
+        username, master_password, password_id)
     if not decrypted_password:
         print("There in no password with this id!")
         return
@@ -208,33 +172,16 @@ def start_decrypting_password(username):
 def start_decrypting_all_passwords(username):
     print(f"{HA}Decrypt All Passwords")
     master_password = getpass("Master Password: ")
-    if not verify_master(username, master_password):
+    if not um.verify_master(username, master_password):
         print("Error! Wrong Master Password")
         return
 
-    passwords = get_passwords(username)
+    passwords = pm.get_passwords(username)
     for p in passwords:
         password_id = p["password_id"]
-        encrypted = get_password(username, master_password, password_id)
+        encrypted = pm.get_password(username, master_password, password_id)
         p["service_password"] = encrypted
     print_passwords(passwords, True)
-
-
-def get_password(username, master_password, password_id):
-    password = db.get_user_service_password(username, password_id)
-    if password != None:
-        return decrypt_password(master_password, password)
-    return None
-
-
-def encrypt_password(password, master_password):
-    c = AESCipher(key=master_password)
-    return c.encrypt(password)
-
-
-def decrypt_password(master_password, password):
-    c = AESCipher(key=master_password)
-    return c.decrypt(password)
 
 
 if __name__ == "__main__":
