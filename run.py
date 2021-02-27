@@ -4,10 +4,10 @@ from getpass import getpass
 from dotenv import load_dotenv
 import uuid
 
-from onepass.db.db_manager import DbManager
-from onepass.models.validation import Validator
-from onepass.models.user_manager import UserManager
-from onepass.models.passwords_manager import PasswordsManager
+from src.db.db_manager import DbManager
+from src.models.validation import Validator
+from src.models.user_manager import UserManager
+from src.models.passwords_manager import PasswordsManager
 
 
 APP_NAME = "onepass"
