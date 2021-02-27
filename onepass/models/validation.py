@@ -17,49 +17,38 @@ SERVICE_URL_MIN_LENGTH = int(os.getenv("SERVICE_URL_MIN_LENGTH"))
 SERVICE_URL_MAX_LENGTH = int(os.getenv("SERVICE_URL_MAX_LENGTH"))
 SERVICE_USERNAME_MIN_LENGTH = int(os.getenv("SERVICE_USERNAME_MIN_LENGTH"))
 SERVICE_USERNAME_MAX_LENGTH = int(os.getenv("SERVICE_USERNAME_MAX_LENGTH"))
-DB_PATH = os.getenv("DATABASE")
-db = DbManager(DB_PATH)
+db = DbManager(os.getenv("DATABASE"))
 
 
 class Validator:
-    def is_option_valid(self, inp, inp_limit, inp_limit1):
-        try:
-            inp = int(inp)
-        except:
-            return False
-        if inp < inp_limit or inp > inp_limit1:
-            return False
-        return True
-
-    # REGISTER
-
     def is_username_valid(self, username):
         if len(username) < USERNAME_MIN_LENGTH:
-            print("Nazwa użytkownika jest zbyt krótka")
+            print("Username is too short")
             return False
         if len(username) > USERNAME_MAX_LENGTH:
-            print("Nazwa użytkownika jest zbyt długa")
+            print("Username is too long")
             return False
         if not re.match('^[a-z]+$', username):
-            print("Nazwa użytkownika może składać się tylko z małych liter!")
+            print("Username can only contain lowercase letters")
             return False
         return True
 
     def is_password_safe(self, password, prfx):
         if not password:
-            print(f"Hasło {prfx} nie może być puste!")
+            print(f"{prfx} Password can't be empty!")
             return False
         if len(password) < PASSWORD_MIN_LENGTH:
             print(
-                f"Hasło {prfx} musi mieć conajmniej {PASSWORD_MIN_LENGTH} znaków!")
+                f"{prfx} Password is too short!")
             return False
         if len(password) > PASSWORD_MAX_LENGTH:
-            print(f"Hasło {prfx} jest zbyt długie!")
+            print(f"{prfx} Password is too long!")
             return False
         regex = ("^(?=.*[a-z])(?=." + "*[A-Z])(?=.*\\d)" +
                  "(?=.*[-+_!@#$%^&*., ?]).+$")
         if not re.search(re.compile(regex), password):
-            print(f"Hasło {prfx} musi składać się przynajmniej: z jednej dużej litery, z jednego małego znaku, z jednej cyfry oraz z jednego znaku specjalnego!")
+            print(
+                f"{prfx} Password must have at least one: lowercase letter, uppercase letter, digit, special character!")
             return False
         return True
 
@@ -67,21 +56,19 @@ class Validator:
         if not self.is_password_safe(password, prfx):
             return False
         if password != password1:
-            print(f"Podane hasła {prfx} nie pasują do siebie!")
+            print(f"{prfx} Passwords do not match!")
             return False
         return True
 
     def is_user_valid(self, user):
         if not self.is_username_valid(user['username']):
             return False
-        if not self.is_passwords_safe(user['password'], user['password1'], "") or not self.is_passwords_safe(user['master'], user['master1'], "główne"):
+        if not self.is_passwords_safe(user['password'], user['password1'], "") or not self.is_passwords_safe(user['master'], user['master1'], "Master"):
             return False
         if db.is_registred(user['username']):
-            print("Niepoprawna nazwa użytkownika, popraw ją i spróbuj ponownie")
+            print("\nIncorrect value of username\n")
             return False
         return True
-
-    # LOGIN
 
     def is_username_login_valid(self, username):
         if len(username) < USERNAME_MIN_LENGTH or len(username) > USERNAME_MAX_LENGTH:
@@ -93,7 +80,6 @@ class Validator:
             return False
         return True
 
-    # ADD PASSWORD
     def is_service_name_valid(self, name):
         if len(name) < SERVICE_NAME_MIN_LENGTH or len(name) > SERVICE_NAME_MAX_LENGTH:
             return False
@@ -106,5 +92,23 @@ class Validator:
 
     def is_service_username_valid(self, service_username):
         if len(service_username) < SERVICE_USERNAME_MIN_LENGTH or len(service_username) > SERVICE_USERNAME_MAX_LENGTH:
+            return False
+        return True
+
+    def is_option_valid(self, inp, inp_limit, inp_limit1):
+        try:
+            inp = int(inp)
+        except:
+            return False
+        if inp < inp_limit or inp > inp_limit1:
+            return False
+        return True
+
+    def is_password_length_valid(self, length, length_limit=8):
+        try:
+            length = int(length)
+            if length < length_limit:
+                return False
+        except:
             return False
         return True

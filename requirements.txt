@@ -2,3 +2,4 @@ python-dotenv
 pycrypto
 bcrypt
 uuid
+#secrets    # secrets is built-in to Python 3.6+
