@@ -6,39 +6,41 @@
 Onepass is a safe password manager, that will help You store your passwords safely.
 
 ## Features
+- Register in manager
+- Login to your account in manager
 - Add a new password
 - Encrypt and store safely new password
-- Decrypt stored passwords with master password
-- Safely configured environment
+- Show all saved passwords with additional info about them (name of service, url to service, ...)
+- Decrypt choosen password (with master password)
+- Decrypt all saved passwords (with master password)
+- Generate Safe Password
+- Secure, offline access
 
 
 ## Tech
 Onepass uses this modules:
 - [**python-dotenv**] - loading env variables
-- [**Flask-Limiter**] - to protect against brute force attacks
-- [**bcrypt**] - hashing password
-- [**pycrypto**] - will be helpful during password encryption
+- [**bcrypt**] - hashing user password
+- [**pycrypto**] - helpful for passwords encryption
 - [**uuid**] - generating unique ids
 
 
 ## Installation
-Onepass requires python 3 to run. 
-Install the requirements and then start the server. Go to web folder and run: 
+Onepass requires python 3 to run.
+
+But before running onepass You need to install all the requirements for the project. 
+To do this, go to onepass folder and type:
+```sh
+python -m pip install -r requirements.txt
+```
+> Note:  If your **version of python is less than 3.6**, then You need to **install secrets package**.
+> To do this, uncomment the last line of requirements.txt
+
+Now, when all required packages are installed, You can run app by typing: 
 ```sh
 python run.py
 ```
 
-
-## Docker
-Instead of installing app You can very easily install and deploy it in a Docker container. You can run it by typing:
-
-```sh
-cd app
-docker-compose up
-```
-
-This will create the docker image of app and pull in all of the necessary dependencies.
-Once done, the sender app will be available under  **https://localhost:8080/** . 
 
 ## License
 
