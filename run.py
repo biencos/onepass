@@ -28,12 +28,15 @@ def main():
 
     ACTIONS = ['login', 'register', 'exit']
     selected = 1
-    while 0 < selected < len(ACTIONS):
+    while 0 <= selected < len(ACTIONS):
         print("\n")
         print_actions(ACTIONS, "-")
         print("")
         selected = get_selected_option(input(":"), 1, len(ACTIONS))
-        if selected == 1:
+
+        if selected == 0:
+            print(f"{TA}Incorrect value of option")
+        elif selected == 1:
             username = start_login()
             start_getting_passwords(username)
 
@@ -45,7 +48,10 @@ def main():
                 print("")
                 selected = get_selected_option(
                     input(":"), 1, len(LOGIN_ACTIONS))
-                if selected == 1:
+
+                if selected == 0:
+                    print(f"{TA}Incorrect value of option")
+                elif selected == 1:
                     start_getting_passwords(username)
                 elif selected == 2:
                     start_adding_password(username)
@@ -67,22 +73,8 @@ def print_actions(actions, prfx):
 
 def get_selected_option(inp, inp_limit, inp_limit1):
     if not v.is_option_valid(inp, inp_limit, inp_limit1):
-        print(
-            f"{TA}Option must be a number between {inp_limit} and {inp_limit1}")
-        sys.exit(0)
+        return 0
     return int(inp)
-
-
-def print_passwords(passwords, decoded=False):
-    if len(passwords) > 0:
-        print(
-            f"{TA}Service Name\tService Url\tUsername\tPassword\t[ Password ID ]")
-        for p in passwords:
-            sp = p["service_password"] if decoded else "*" * 8
-            print(
-                f'{TA}{p["service_name"]}\t\t{p["service_url"]}\t{p["service_username"]}\t{sp}\t[ {p["password_id"]} ]')
-    else:
-        print(f"{HA}There is no passwords yet.")
 
 
 def start_register():
@@ -182,6 +174,18 @@ def start_decrypting_all_passwords(username):
         encrypted = pm.get_password(username, master_password, password_id)
         p["service_password"] = encrypted
     print_passwords(passwords, True)
+
+
+def print_passwords(passwords, decoded=False):
+    if len(passwords) > 0:
+        print(
+            f"{TA}Service Name\tService Url\tUsername\tPassword\t[ Password ID ]")
+        for p in passwords:
+            sp = p["service_password"] if decoded else "*" * 8
+            print(
+                f'{TA}{p["service_name"]}\t\t{p["service_url"]}\t{p["service_username"]}\t{sp}\t[ {p["password_id"]} ]')
+    else:
+        print(f"{HA}There is no passwords yet.")
 
 
 if __name__ == "__main__":
