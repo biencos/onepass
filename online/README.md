@@ -3,17 +3,22 @@
 
 [![Build Status](https://travis-ci.org/joemccann/dillinger.svg?branch=master)](https://travis-ci.org/joemccann/dillinger)
 
-Onepass is a safe password manager, that will help You store your passwords safely.
+Onepass is a safe password manager, that will help You store your login details safely.
 
 ## Features
+- Register in manager
+- Login to your account in manager
 - Add a new password
 - Encrypt and store safely new password
+- Show all saved passwords with additional info about them (name of service, url to service, ...)
 - Decrypt stored passwords with master password
-- Safely configured environment
+- Generate Safe Password
+- Safely configured server environment
 
 
 ## Tech
-Onepass uses this modules:
+**Flask**, **Python**, **MYSQL**, **SQLite**, **JavaScript**, **HTML**, **CSS** were used to create the application.
+In addition, the following libraries were used:
 - [**python-dotenv**] - loading env variables
 - [**Flask-Limiter**] - to protect against brute force attacks
 - [**bcrypt**] - hashing password
