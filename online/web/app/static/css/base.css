@@ -1,0 +1,66 @@
+header img {
+    height: 80px;
+    margin-left: 40px;
+  }
+  
+  body {
+    height: 125vh;
+    background-image: url('https://image.freepik.com/free-photo/abstract-digital-grid-black-background_53876-97647.jpg');
+    background-size: cover;
+    font-family: sans-serif;
+    margin-top: 80px;
+    padding: 30px;
+    margin-bottom: 40px;
+  }
+
+  body h3 {
+    color: lightcoral;
+    padding-left: 40px;
+    font-size: 150%;
+    font-family: 'Times New Roman', Times, serif;
+    margin: 10px 400px 10px 500px;
+  } 
+  
+  main {
+    color: white;
+  }
+  
+  header {
+    background-color: white;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 80px;
+    display: flex;
+    align-items: center;
+    box-shadow: 0 0 25px 0 black;
+  }
+  
+  header * {
+    display: inline;
+  }
+  
+  header li {
+    margin: 20px;
+  }
+  
+  header li a {
+    color: green;
+    text-decoration: none;
+  }
+  
+  footer {
+    position: fixed;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    text-align: center;
+  }
+  
+  footer div {
+    color: white;
+    text-decoration: none;
+    font-size: 12px;
+  }
+  

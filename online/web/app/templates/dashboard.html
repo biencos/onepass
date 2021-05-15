@@ -1,0 +1,165 @@
+{% extends "base.html" %} {% block content %}
+
+<head>
+    <link rel="stylesheet" href="../static/css/dashboard.css" />
+    <script type="text/javascript" src="../static/scripts/dashboard.js" defer></script>
+</head>
+
+<body>
+
+    <!-- SHOW PASSWORDS  -->
+    <div class="passwords-table">
+        <h2>Twoje Hasła</h2>
+        <table id="passwords-table">
+            <thead>
+                <tr>
+                    <th>Nazwa Serwisu</th>
+                </tr>
+            </thead>
+            <tbody id="passwords-table-body"></tbody>
+        </table>
+    </div>
+
+
+
+
+    <!-- DECRYPT PASSWORD -->
+    <h2>Odszyfruj Hasło</h2>
+    <div class="container">
+        <form id="decrypt_frm">
+            <label for="decrypt-name">Nazwa Serwisu</label>
+            <input id="decrypt-name" name="decrypt-name" type="text" placeholder="Nazwa Serwisu" required />
+
+            <label for="decrypt-master">Hasło Główne</label>
+            <input id="decrypt-master" name="decrypt-master" type="password" placeholder="Hasło Główne" required />
+        </form>
+        <button id="decrypt-button">Odszyfruj Hasło</button>
+    </div>
+    <p id="decrypt-text"></p>
+
+
+
+    <!-- ADD PASSWORD -->
+    <h2>Dodaj Hasło</h2>
+    <div class="container">
+        <form id="add_frm" name="add_frm">
+            <label for="add-name">Nazwa Serwisu</label>
+            <input id="add-name" name="add-name" type="text" placeholder="Nazwa Serwisu" required />
+
+            <label for="add-password">Hasło w Serwisie</label>
+            <input id="add-password" name="add-password" type="password" placeholder="Hasło w serwisie" required />
+
+            <label for="add-master">Hasło Główne</label>
+            <input id="add-master" name="add-master" type="password" placeholder="Hasło Główne" required />
+        </form>
+        <button id="add-button">Dodaj Hasło</button>
+    </div>
+
+
+
+    <!-- CHANGE PASSWORD -->
+    <h2>Zmień Hasło</h2>
+    <div class="container">
+        <form id="change_frm" name="change_frm">
+            <label for="change-name">Nazwa Serwisu</label>
+            <input id="change-name" name="change-name" type="text" placeholder="Nazwa Serwisu" required />
+
+            <label for="change-password">Nowe Hasło w Serwisie</label>
+            <input id="change-password" name="change-password" type="password" placeholder="Nowe Hasło w Serwisie "
+                required />
+
+            <label for="change-master">Hasło Główne</label>
+            <input id="change-master" name="change-master" type="password" placeholder="Hasło Główne" required />
+        </form>
+        <button id="change-button">Zmień Hasło</button>
+    </div>
+
+
+
+
+    <!-- SHOW PASSWORD HISTORY -->
+    <h2>Historia Hasła</h2>
+    <div class="container">
+        <form id="show_frm" name="show_frm">
+            <label for="show-name">Nazwa Serwisu</label>
+            <input id="show-name" name="show-name" type="text" placeholder="Nazwa Serwisu" required />
+
+            <label for="show-master">Hasło Główne</label>
+            <input id="show-master" name="show-master" type="password" placeholder="Hasło Główne" required />
+        </form>
+        <button id="show-button">Pokaż Historię</button>
+    </div>
+    <table id="passwords-history-table">
+        <thead>
+            <tr>
+                <th>Data</th>
+                <th>Hasło</th>
+            </tr>
+        </thead>
+        <tbody id="history-table-body"></tbody>
+    </table>
+
+
+        <!-- GENERATE PASSWORD -->
+        <h2>Wygeneruj Hasło</h2>
+        <div class="container">
+            <form id="generate_frm">
+                <label for="generate-length">Długość Hasła</label>
+                <input id="generate-length" name="generate-length" type="number" placeholder="Min. 8 znaków" min="8" max="25" required />
+<!--     
+                <label for="generate-master">Hasło Główne</label>
+                <input id="generate-master" name="generate-master" type="password" placeholder="Hasło Główne" required /> -->
+            </form>
+            <button id="generate-button">Wygeneruj Hasło</button>
+        </div>
+        <p id="generate-text"></p>
+
+
+
+
+
+    <!-- SHOW MORE INFO ABOUT ACCOUNT IN SERVICE -->
+    <!-- <div class="show-info-class">
+        <section id="show-info-section">
+            <h2>Pokaż Więcej Informacji o Serwisie</h2>
+            <form id="showi_frm" name="showi_frm">
+                <ul>
+                    <input id="showi-name" name="showi-name" type="text" placeholder="Nazwa Serwisu" required />
+                    <input id="showi-master" name="showi-master" type="password" placeholder="Hasło Główne" required />
+                </ul>
+            </form>
+            <button id="showi-button">Pokaż Info</button>
+        </section>
+    </div>
+
+    <div class="show-more-info-class">
+        <div id="showi-image"></div>
+        <p id="showi-sname"></p>
+        <p id="showi-url"></p>
+        <p id="showi-username"></p>
+    </div> -->
+
+
+    <!-- ADD MORE INFO ABOUT PASSWORD -->
+    <!-- <div class="add-info-class">
+        <section id="add-info-section">
+            <h2>Dodaj Więcej informacji o Profilu w Serwisie</h2>
+            <form id="addi_frm" name="addi_frm">
+                <ul>
+                    <input id="addi-name" name="addi-name" type="text" placeholder="Nazwa Serwisu" required />
+                    <input id="addi-username" name="addi-username" type="text"
+                        placeholder="Nazwa Użytkownika w Serwisie" required />
+                    <input id="addi-url" name="addi-url" type="text" placeholder="URL do Serwisu" required />
+                    <input id="addi-image" name="addi-image" type="text" placeholder="URL do Logo Serwisu" required />
+                    <input id="addi-master" name="addi-master" type="password" placeholder="Hasło Główne" required />
+                </ul>
+            </form>
+            <button id="addi-button">Dodaj Informacje</button>
+        </section>
+    </div> -->
+
+
+
+</body>
+
+{% endblock %}

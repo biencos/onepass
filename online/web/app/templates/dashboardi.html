@@ -1,0 +1,56 @@
+{% extends "base.html" %} {% block content %}
+
+<head>
+    <link rel="stylesheet" href="../static/css/dashboardi.css" />
+    <script type="text/javascript" src="../static/scripts/dashboardi.js" defer></script>
+</head>
+
+<body>
+
+    <!-- SHOW MORE INFO ABOUT ACCOUNT IN SERVICE -->
+    <h2>Pokaż Informacje w Serwisie</h2>
+    <div class="container">
+        <form id="showi_frm" name="showi_frm">
+            <label for="showi-name">Nazwa Serwisu</label>
+            <input id="showi-name" name="showi-name" type="text" placeholder="Nazwa Serwisu" required />
+
+            <label for="showi-master">Hasło Główne</label>
+            <input id="showi-master" name="showi-master" type="password" placeholder="Hasło Główne" required />
+        </form>
+        <button id="showi-button">Pokaż Info</button>
+    </div>
+
+    <div class="card">
+        <div id="showi-image"></div>
+        <h4 id="showi-sname"></h4>
+        <p id="showi-url"></p>
+        <p id="showi-username"></p>
+    </div>
+
+
+    <!-- ADD MORE INFO ABOUT PASSWORD -->
+    <h2>Dodaj Informacje w Serwisie</h2>
+    <div class="container">
+        <form id="addi_frm" name="addi_frm">
+            <label for="addi-name">Nazwa Serwisu</label>
+            <input id="addi-name" name="addi-name" type="text" placeholder="Nazwa Serwisu" required />
+
+            <label for="addi-username">Login w Serwisie</label>
+            <input id="addi-username" name="addi-username" type="text" placeholder="Nazwa Użytkownika w Serwisie"
+                required />
+
+            <label for="addi-url">URL Serwisu</label>
+            <input id="addi-url" name="addi-url" type="text" placeholder="URL Serwisu" required />
+
+            <label for="addi-image">URL do Logo Serwisu</label>
+            <input id="addi-image" name="addi-image" type="text" placeholder="URL do Logo Serwisu" required />
+
+            <label for="addi-master">Hasło Główne</label>
+            <input id="addi-master" name="addi-master" type="password" placeholder="Hasło Główne" required />
+        </form>
+        <button id="addi-button">Dodaj Informacje</button>
+    </div>
+
+</body>
+
+{% endblock %}

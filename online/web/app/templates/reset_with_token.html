@@ -1,0 +1,31 @@
+{% extends "base.html" %} {% block content %}
+
+<head>
+    <link rel="stylesheet" href="../static/css/reset_with_token.css" />
+    <script type="text/javascript" src="../static/scripts/reset_with_token.js" defer></script>
+</head>
+
+<body>
+    <script>
+        function getURL() {
+            return window.location.href;
+        }
+    </script>
+
+    <h2>Zresetuj swoje hasło</h2>
+    <div class="form">
+        <form name="form" method="POST" action="" enctype="multipart/form-data">
+            <label for="password"><b>Nowe Hasło:</b></label>
+            <progress max="100" value="0" id="password-meter" name="password-meter"></progress>
+            <input id="password" name="password" type="password" placeholder="Podaj swoje hasło" required>
+            <p>Pamiętaj że hasło powinno mieć więcej niż 7 znaków składać się przynajmniej z 1 małej litery, 1
+                dużejlitery, 1 cyfry i 1 znaku specjalnego </p>
+
+            <label for="password1"><b>Powtórz Hasło:</b></label>
+            <input id="password1" name="password1" type="password" placeholder="Powtórz hasło" required>
+
+            <input type="submit" name="submit" value="Zresetuj hasło">
+    </div>
+</body>
+
+{% endblock %}

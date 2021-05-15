@@ -1,0 +1,49 @@
+{% extends "base.html" %} {% block content %}
+
+<head>
+    <link rel="stylesheet" href="../static/css/register.css" />
+    <script type="text/javascript" src="../static/scripts/register.js" defer></script>
+</head>
+
+<body>
+    <h2>Rejestracja</h2>
+    <div class="container">
+        <form name="form" method="POST" action="/register" enctype="multipart/form-data">
+
+            <label for="username"><b>Nazwa Użytkownika:</b></label>
+            <input id="username" name="username" type="text" placeholder="Podaj swój login" required>
+            <p>Pamiętaj że nazwa użytkownika powinna być większa niż 7 znaków oraz składać tylko z małych liter</p>
+
+
+            <label for="email"><b>Email:</b></label>
+            <input id="email" name="email" type="text" placeholder="Podaj swój email" required>
+
+
+            <label for="password"><b>Hasło:</b></label>
+            <progress max="100" value="0" id="password-meter" name="password-meter"></progress>
+            <input id="password" name="password" type="password" placeholder="Podaj swoje hasło" required>
+            <p>Pamiętaj że hasło powinno mieć więcej niż 7 znaków składać się przynajmniej z 1 małej litery, 1 dużej
+                litery, 1 cyfry i 1 znaku specjalnego </p>
+
+
+            <label for="password1"><b>Powtórz Hasło:</b></label>
+            <input id="password1" name="password1" type="password" placeholder="Powtórz hasło" required>
+
+
+            <label for="password"><b>Hasło Główne:</b></label>
+            <progress max="100" value="0" id="master-password-meter" name="master-password-meter"></progress>
+            <input id="master_password" name="master_password" type="password" placeholder="Podaj swoje hasło główne"
+                required>
+            <p>Pamiętaj że hasło główne powinno mieć więcej niż 7 znaków składać się przynajmniej z 1 małej litery,
+                1 dużej litery, 1 cyfry i 1 znaku specjalnego </p>
+
+            <label for="password1"><b>Powtórz Hasło Główne:</b></label>
+            <input id="master_password1" name="master_password1" type="password" placeholder="Powtórz hasło główne"
+                required>
+
+            <input type="submit" name="submit" value="Zarejestruj się">
+        </form>
+    </div>
+</body>
+
+{% endblock %}
