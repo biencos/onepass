@@ -1,0 +1,80 @@
+body {
+  font-family: Arial;
+  height: 100%;
+}
+
+body h2 {
+  color: white;
+  padding-left: 40px;
+  font-size: 200%;
+  font-family: 'Times New Roman', Times, serif;
+  margin: 10px 400px 10px 600px;
+}
+
+input[type=text], select {
+  width: 100%;
+  padding: 12px 20px;
+  margin: 8px 0;
+  display: block;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+
+
+input[type=password] {
+  width: 100%;
+  padding: 12px 20px;
+  margin: 8px 0;
+  display: block;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+
+button {
+  width: 100%;
+  background-color: #4CAF50;
+  color: white;
+  padding: 14px 20px;
+  margin: 8px 0;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #45a049;
+}
+
+div.container {
+  border-radius: 20px;
+  background-color: #f2f2f2;
+  padding: 20px;
+  margin: 20px 400px 20px 400px;
+}
+
+body p {
+  color: white;
+  padding-left: 40px;
+  font-size: 150%;
+  font-family: 'Times New Roman', Times, serif;
+  margin: 30px 400px 30px 500px;
+}
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+th, td {
+  text-align: left;
+  padding: 8px;
+}
+
+tr{background-color: #f2f2f2}
+
+th {
+  background-color: #4CAF50;
+  color: white;
+}

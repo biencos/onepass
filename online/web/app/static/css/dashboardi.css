@@ -1,0 +1,112 @@
+body {
+  font-family: Arial;
+}
+
+body h2 {
+  color: white;
+  padding-left: 40px;
+  font-size: 200%;
+  font-family: 'Times New Roman', Times, serif;
+  margin: 10px 400px 10px 350px;
+}
+
+input[type=text], select {
+  width: 100%;
+  padding: 12px 20px;
+  margin: 8px 0;
+  display: block;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+
+
+input[type=password] {
+  width: 100%;
+  padding: 12px 20px;
+  margin: 8px 0;
+  display: block;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+
+button {
+  width: 100%;
+  background-color: #4CAF50;
+  color: white;
+  padding: 14px 20px;
+  margin: 8px 0;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #45a049;
+}
+
+div.container {
+  border-radius: 20px;
+  background-color: #f2f2f2;
+  padding: 20px;
+  margin: 10px 400px 10px 400px;
+}
+
+/*
+body p {
+  color: black;
+  padding-left: 20px;
+  font-size: 50%;
+  font-family: 'Times New Roman', Times, serif;
+}
+ body p {
+  color: white;
+  padding-left: 40px;
+  font-size: 150%;
+  font-family: 'Times New Roman', Times, serif;
+  margin: 10px 400px 10px 500px;
+} */
+
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+th, td {
+  text-align: left;
+  padding: 8px;
+}
+
+tr {background-color: #f2f2f2}
+
+th {
+  background-color: #4CAF50;
+  color: white;
+}
+
+.card {
+  background-color: rgb(211, 211, 211);
+  box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
+  transition: 0.3s;
+  width: 40%;
+  border-radius: 20px;
+  padding: 20px;
+}
+p{
+    color:  #4CAF50;
+    margin-left:  3em;
+    padding-top: 1em;
+    margin-top: 1em;
+}
+h4{color:  #4CAF50;
+    margin: 1em;
+}
+
+.card:hover {
+  box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2);
+}
+b {
+  padding: 2px 16px;
+}

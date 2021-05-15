@@ -1,0 +1,19 @@
+{% extends "base.html" %} {% block content %}
+
+<head>
+    <link rel="stylesheet" href="../static/css/reset.css" />
+</head>
+
+<body>
+    <h2>Zresetuj Swoje Hasło</h2>
+    <div class="container">
+        <form id="reset-form" name="reset-form" method="POST" action="/reset" enctype="multipart/form-data">
+            <label for="email">Twój Email</label>
+            <input id="email" name="email" type="text" placeholder="Email powiązany z twoim kontem ..." required>
+
+            <input type="submit" name="submit" value="Zresetuj Hasło">
+        </form>
+    </div>
+</body>
+
+{% endblock %}
